@@ -12,7 +12,7 @@ def on_message(ws, message):
 
 
 
-	
+
 
 def on_error(ws, error):
 	print error
@@ -23,10 +23,7 @@ def on_close(ws):
 def on_open(ws):
 	print "### open ###"
 
-
-
-
-if __name__ == "__main__":
+def websockets():
 	websocket.enableTrace(False)
 	ws = websocket.WebSocketApp("ws://192.168.1.15:3000/",
 	on_message = on_message,
@@ -34,3 +31,6 @@ if __name__ == "__main__":
 	on_close = on_close)
 	ws.on_open = on_open
 	ws.run_forever()
+
+
+
