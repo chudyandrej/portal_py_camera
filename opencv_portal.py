@@ -4,6 +4,8 @@ from sets import Set
 from tracked_object import TrackedObject
 from collections import namedtuple
 from bg_subtractor import frames, main
+from load_data import get_json_config
+
 import time
 import math
 import random
@@ -178,6 +180,21 @@ def counter_person_flow(tracked_objects, t):
 def start_tracking():
     cv2.namedWindow('frame', 0) 
     cv2.namedWindow('filtered_fgmask', 0) 
+    settings = get_json_config('http://192.168.1.15:3000/api/portal_endpoint/settings/1', 'settings.txt')
+    global learning_history
+    learning_history = settings['learning_history']
+    global thresholding
+    thresholding = settings['thresholding']
+    global min_area
+    min_area = settings['min_area']
+    global shadow_thresh
+    shadow_thresh = settings['shadow_thresh']
+    global max_dist_to_pars
+    max_dist_to_pars = settings['max_dist_to_parse']
+    global min_dis_to_create
+    min_dis_to_create = settings['min_dist_to_create']
+
+
     main()
     cap = cv2.VideoCapture("/home/andrej/Music/colisions/video.mkv")
     bg_subtractor = init_bg_substractor()
