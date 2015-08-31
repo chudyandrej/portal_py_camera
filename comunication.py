@@ -32,10 +32,10 @@ def websockets():
 	ws.run_forever()
 
 def send_transaction(tag_id , direction):
-	time = int(time.time())
+	
 
 	url = "http://192.168.1.15:3000/api/portal_endpoint/transaction/1"
-	data = '{"tagId":'+ str(tag_id) +',"direction":"'+direction+'","time":'+str(time)+'}'
+	data = '{"tagId":'+ str(tag_id) +',"direction":"'+direction+'","time":'+str(int(time.time()))+'}'
 	headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 	print json.dumps(data)
 	try:

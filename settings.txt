@@ -1,1 +1,1 @@
-{"learning_history":1000,"thresholding":80,"min_area":40000,"min_dist_to_create":400,"max_dist_to_parse":250,"shadow_thresh":0.5,"frame_width":1280,"frame_height":720}
+{"learning_history":1000,"thresholding":1300,"min_area":2200,"min_dis_to_create":70,"max_dist_to_pars":60,"shadow_thresh":1,"penalt":20}
