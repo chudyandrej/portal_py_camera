@@ -1,5 +1,5 @@
 import cv2
-from websocketclient import websockets
+from comunication import websockets
 import thread
 from Queue import Queue
 from threading import Lock

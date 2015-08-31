@@ -1,10 +1,12 @@
 import numpy as np
 import cv2
+import thread
 from sets import Set
 from tracked_object import TrackedObject
 from collections import namedtuple
 from bg_subtractor import frames, main
 from load_data import get_json_config
+from comunication import send_transaction
 
 import time
 import math
@@ -147,11 +149,13 @@ def abs_disto_obj(tracked_object, t):
         if abs(distance) > frame_height / 2: 
             pass_in += 1
             print "in: " + str(pass_in)
+            thread.start_new_thread(send_transaction,(1525458,'in'))
             return 0              
     else: 
         if abs(distance) > frame_height / 2:
             pass_out += 1
             print "out: " + str(pass_out)
+            thread.start_new_thread(send_transaction,(1525458,'out'))
             return 0
     return 1
 
