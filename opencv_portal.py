@@ -36,10 +36,10 @@ def apply_subtractor(frame, bg_subtractor):
     return bg_subtractor.apply(frame)
 
 def erode_dilate(fgmask):
-    #kernel = np.ones((5,5),np.uint8)
-    #erosion = cv2.erode(fgmask,kernel,iterations = 1)
-    #dilation = cv2.dilate(erosion,kernel,iterations = 2)
-    return fgmask
+    kernel = np.ones((5,5),np.uint8)
+    erosion = cv2.erode(fgmask,kernel,iterations = 1)
+    dilation = cv2.dilate(erosion,kernel,iterations = 2)
+    return dilation
 
 def find_contours(filtered_fgmask):
     _ , contours, _ = cv2.findContours(filtered_fgmask.copy(),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
