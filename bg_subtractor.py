@@ -39,7 +39,7 @@ def worker(index, bg_subtractor):
 
 def main():
 	bg_subtractor = init_bg_subtractor()
-	thread.start_new_thread(websockets)
+	thread.start_new_thread(websockets,())
 
 	for i in range(0, num_workers):
 		cap_locks[i].acquire(True)
