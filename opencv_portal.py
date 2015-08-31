@@ -17,6 +17,7 @@ min_area = 2200
 shadow_thresh = 0.7
 max_dist_to_pars = 60
 min_dis_to_create = 70
+penalt = 20
 frame_width = 320
 frame_height = 240
 pass_in = 0
@@ -89,7 +90,7 @@ def parse_contours(contours, tracked_objects,t):
             seen.append(obj)
             cnt.obj_count[0] += 1
 
-    distances = map(lambda d :(d[0], d[1], d[2] + d[1].obj_count[0]*20), distances)
+    distances = map(lambda d :(d[0], d[1], d[2] + d[1].obj_count[0]*penalt), distances)
     distances = sorted(distances, key=lambda d : d[2])
     used_objects = []
     used_cnts = []
@@ -176,11 +177,6 @@ def counter_person_flow(tracked_objects, t):
 
 
                 
-    
-
-
-
-
 def start_tracking():
     cv2.namedWindow('frame', 0) 
     cv2.namedWindow('filtered_fgmask', 0) 
@@ -194,9 +190,11 @@ def start_tracking():
     global shadow_thresh
     shadow_thresh = settings['shadow_thresh']
     global max_dist_to_pars
-    max_dist_to_pars = settings['max_dist_to_parse']
+    max_dist_to_pars = settings['max_dist_to_pars']
     global min_dis_to_create
-    min_dis_to_create = settings['min_dist_to_create']
+    min_dis_to_create = settings['min_dis_to_create']
+    global penalt
+    penalt = settings['penalt']
 
 
     main()
