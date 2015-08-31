@@ -44,8 +44,7 @@ def send_transaction(tag_id , direction):
 		
 		transactions.append(data)
 
-	if not transactions :
-			while not transactions:
-				r = requests.post(url, data=transactions.pop(), headers=headers)
+	while transactions:
+		r = requests.post(url, data=transactions.pop(), headers=headers)
 
 
