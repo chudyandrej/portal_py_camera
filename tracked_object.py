@@ -48,16 +48,7 @@ class TrackedObject():
         else:
             return 0
 
-    def get_direction(self):
-        _, y = self.get_position()
-        if (abs(y - self.start_y) > MIN_DISTANCE_OF_PASS):
-            if y > self.start_y:
-                return 1
-            return -1
-        return 0
-
-
-
+   
     def get_prediction(self, current_t):
         Point = namedtuple('Point', 'x y')
         if (len(self.history) == 0) :

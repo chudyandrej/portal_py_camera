@@ -9,7 +9,7 @@ from tracked_object import TrackedObject
 from collections import namedtuple
 from bg_subtractor import frames, start_threads, load_settings
 from comunication import send_transaction
-
+from comunication import play_in_sound, play_out_sound
 min_area = 2200
 max_dist_to_pars = 60
 min_dis_to_create = 70
@@ -123,24 +123,29 @@ def abs_disto_obj(tracked_object, t):
     global pass_in 
     global pass_out
     distance = tracked_object.start_y - tracked_object.get_prediction(t).y
-    if distance < 0:    
-        if abs(distance) > frame_height / 2:        
-            pass_in += 1
-            print "in: " + str(pass_in)
-            thread.start_new_thread(send_transaction,(1525458,'in'))
-            return 0              
-    else: 
-        if abs(distance) > frame_height / 2:
-            pass_out += 1
-            print "out: " + str(pass_out)
-            thread.start_new_thread(send_transaction,(1525458,'out'))
-            return 0
+    prediction_distace = tracked_object.get_position().y - tracked_object.get_prediction(t).y
+    if abs(prediction_distace) < frame_height / 3:
+        if distance < 0:    
+            if abs(distance) > frame_height / 2:        
+                pass_in += 1
+                print "in: " + str(pass_in)
+                #thread.start_new_thread(send_transaction,(1525458,'in'))
+                thread.start_new_thread(play_in_sound,())
+                return 0              
+        else: 
+            if abs(distance) > frame_height / 2:
+                pass_out += 1
+                print "out: " + str(pass_out)
+                #thread.start_new_thread(send_transaction,(1525458,'out'))
+                thread.start_new_thread(play_out_sound,())
+                return 0
     return 1
 
 
 def counter_person_flow(tracked_objects, t):
-    #create countering lines
     for tracked_object in tracked_objects:
+        global record
+        record = True
         if (tracked_object.start_y < frame_height / 2 and 
                 tracked_object.get_prediction(t).y > frame_height - frame_height / 4 ): #up line 
             if abs_disto_obj(tracked_object, t) == 0:   #object-counting 
@@ -161,15 +166,20 @@ def start_tracking():
     global max_dist_to_pars
     global min_dis_to_create
     global penalt
-    min_area, max_dist_to_pars, min_dis_to_create, penalt  = load_settings()
+ #   min_area, max_dist_to_pars, min_dis_to_create, penalt  = load_settings()
 
     start_threads()
     tracked_objects = []
+
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    record_cap = cv2.VideoWriter('output.avi',fourcc, 20.0, (frame_width,frame_height))
 
     t = 1
     while(True):
         #print "q.size " + str(frames.qsize())
         frame , fgmask = frames.get(block=True)
+        global record
+        record = False;
         
         filtered_fgmask = erode_dilate(fgmask)
         contour_objects = find_contours(filtered_fgmask)
@@ -198,7 +208,9 @@ def start_tracking():
         frame = cv2.putText(frame,str(pass_in), (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
         frame = cv2.putText(frame,str(pass_out), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, 100 )
 
-       
+        if record == True:
+            record_cap.write(frame)
+        
         cv2.imshow('frame',frame)
         cv2.imshow('filtered_fgmask',filtered_fgmask)
 
@@ -207,10 +219,6 @@ def start_tracking():
         key = cv2.waitKey(1)
         if key & 0xFF == ord('q'):
         	break
-        if key & 0xFF == ord('f'):
-            frame_delay = 1
-        if key & 0xFF == ord('s'):
-            frame_delay = 1000
         if key & 0xFF == ord('l'):
             time.sleep(20)
         if key & 0xFF == ord('p'):

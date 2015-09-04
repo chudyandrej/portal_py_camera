@@ -3,8 +3,9 @@ import requests
 import json
 import time
 import os
+import pygame
 #### Configuring Settings ####
-server_url = "192.168.1.15:3000"
+server_url = "192.168.1.14"
 portalID = "1"
 ##############################
 def on_message(ws, message):
@@ -78,3 +79,7 @@ def get_json_config():
 	return settings
 
 
+def play_in_sound():
+   os.system("aplay /home/andrej/project_portals/in.wav")
+def play_out_sound():
+   os.system("aplay /home/andrej/project_portals/out.wav")

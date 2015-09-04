@@ -10,17 +10,17 @@ cap_locks = [Lock() for i in range(0, num_workers)]		#init mutexes for capture
 push_locks = [Lock() for i in range(0, num_workers)]	#init mutexes for push to queue
 
 learning_history = 1000
-thresholding = 1300
+thresholding = 3000
 shadow_thresh = 0.7
 
 frames = Queue(10)		#init queue of frams and bg masks
 
 def init_capture():
 	#inicializating capture
-	cap = cv2.VideoCapture(0)								
+	cap = cv2.VideoCapture("/home/andrej/Music/video1/pi_video1.mkv")								
 	cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320) 
 	cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-	cap.set(cv2.CAP_PROP_SATURATION, 100)		#set SATURATION 0 - 100
+	#cap.set(cv2.CAP_PROP_SATURATION, 100)		#set SATURATION 0 - 100
 	return cap
 
 def load_settings():
