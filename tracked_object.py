@@ -40,6 +40,24 @@ class TrackedObject():
             return Point(0,0)
         return Point(self.history[-1][0], self.history[-1][1])
 
+
+    def abs_disto_obj(self,tracked_object, t):
+        #calculate abosult distace from start position to prediction position
+        pass_in = 0
+        pass_out = 0
+        distance = self.start_y - self.get_prediction(t).y
+        prediction_distace = self.get_position().y - self.get_prediction(t).y
+        if abs(prediction_distace) < frame_height / 3:
+            if distance < 0:    
+                if abs(distance) > frame_height / 2:
+                    pass_in+=1                     
+            else: 
+                if abs(distance) > frame_height / 2:
+                    pass_out+=1
+        return pass_in , pass_out
+
+
+
     def missing(self):
         self.frames_missing += 1
 
@@ -72,15 +90,6 @@ class TrackedObject():
         current_x = last_x + v_x * delta_t
 
         current_y = last_y + v_y * delta_t
-     
-        if current_x <= 0:
-            current_x = 0
-        if current_x >= frame_width:
-            current_x = frame_width
-        if current_y <= 0:
-            current_y = 0
-        if current_y >= frame_height:
-            current_y = frame_height
 
 
         return Point(int(current_x), int(current_y))
