@@ -7,8 +7,9 @@ import random
 from tracked_object import TrackedObject
 from collections import namedtuple
 from bg_subtractor import frames, start_threads, load_settings
-from comunication import send_transaction
+from comunication import send_transaction, get_tag_permission
 from comunication import play_in_sound, play_out_sound
+from antena_read import AntennaReader
 
 ###############SETTINGS##############################
 GUI = False
@@ -124,7 +125,7 @@ def update_missing(unused_objects, tracked_objects):
         if unused_object.missing() == -1:
             tracked_objects.remove(unused_object)
   
-def counter_person_flow(tracked_objects, t):
+def counter_person_flow(tracked_objects, antenna_reader, t):
     global pass_in
     global pass_out
     for tracked_object in tracked_objects:
@@ -138,7 +139,9 @@ def counter_person_flow(tracked_objects, t):
             if i != 0 or o != 0:   #object-counting 
                 tracked_object.start_y = FRAME_HEIGHT
                 tracked_object.changed_starting_pos = True
-                thread.start_new_thread(send_transaction,(1525458,'in'))
+                tag, certainity = antenna_reader.get_object_tag_id(tracked_object.center_time)
+                alarm = get_tag_permission(tag)
+                thread.start_new_thread(send_transaction,(tag,'in', certainity, alarm))
                 thread.start_new_thread(play_in_sound,())
             
         if (tracked_object.start_y > FRAME_HEIGHT / 2 and
@@ -149,7 +152,9 @@ def counter_person_flow(tracked_objects, t):
             if i != 0 or o != 0:   #object-counting
                 tracked_object.start_y = 0
                 tracked_object.changed_starting_pos = True
-                thread.start_new_thread(send_transaction,(1525458,'out'))
+                tag, certainity = antenna_reader.get_object_tag_id(tracked_object.center_time)
+                alarm = get_tag_permission(tag)
+                thread.start_new_thread(send_transaction,(tag,'out',certainity, alarm))
                 thread.start_new_thread(play_out_sound,())
 
 def parse_arguments(arguments):
@@ -173,8 +178,8 @@ def tracking_start(arguments):
 
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     record_cap = cv2.VideoWriter('output.avi',fourcc, 20.0, (FRAME_WIDTH,FRAME_HEIGHT))
-
-    t = 1
+    antena_reader = AntennaReader()
+   
     while(True):
         #print "q.size " + str(frames.qsize())
         frame , fgmask = frames.get(block=True)
@@ -183,12 +188,13 @@ def tracking_start(arguments):
         
         filtered_fgmask = erode_dilate(fgmask)
         contour_objects = find_contours(filtered_fgmask)
-        t += 1
+        t = time.time()
+        
         pairs, unused_cnts, unused_objects = parse_contours(contour_objects, tracked_objects,t)
         pause = create_objects(unused_cnts, tracked_objects,t)
         update_pairs(pairs, t)
         update_missing(unused_objects,tracked_objects)
-        counter_person_flow(tracked_objects, t)
+        counter_person_flow(tracked_objects, antena_reader, t)
         if GUI:
             cv2.namedWindow('frame', 0)             #init windows
             cv2.namedWindow('filtered_fgmask', 0) 

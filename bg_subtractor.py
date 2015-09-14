@@ -18,7 +18,7 @@ push_locks = [Lock() for i in range(0, NUM_WORKERS)]	#init mutexes for push to q
 
 def init_capture():
 	#inicializating capture
-	cap = cv2.VideoCapture("/home/andrej/Videos/Webcam/videoApis.avi")								
+	cap = cv2.VideoCapture("/home/andrej/Music/colisions/video.mkv")								
 	cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320) 
 	cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 	cap.set(cv2.CAP_PROP_SATURATION, 100)		#set SATURATION 0 - 100
@@ -70,7 +70,7 @@ def start_threads():
 	bg_subtractor = init_bg_subtractor()
 	get_list_tag()
 
-	thread.start_new_thread(websockets,())	#start websocket thread
+	#thread.start_new_thread(websockets,())	#start websocket thread
 	#start all workers
 	for i in range(0, NUM_WORKERS):						
 		cap_locks[i].acquire(True)

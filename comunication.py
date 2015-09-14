@@ -7,9 +7,9 @@ import ast
 import thread
 from threading import Lock
 transaction_lock = Lock()
-
+tags_list = []
 ####### Configuring Settings #######
-server_url = "apis-portals.herokuapp.com"
+server_url = "192.168.1.14:3000"
 portalID = "1"
 ####################################
 
@@ -37,13 +37,15 @@ def websockets():
 	ws.on_open = on_open
 	ws.run_forever()
 
-def send_transaction(tag_id , direction):			
+def send_transaction(tag_id , direction, certainity, alarm):			
 	url = "http://"+server_url+"/api/portal_endpoint/transaction/"+portalID+""
-	data = '{"tagId":'+str(tag_id)+',"direction":"'+direction+'","time":'+str(int(time.time()))+'}'
+	data = '{"tagId":'+str(tag_id)+',"direction":"'+direction+'","time":'+str(int(time.time()))+',"certainity":"'+str(certainity)+'","alarm":"'+str(alarm)+'"}'
 	headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 	transaction_lock.acquire(True)
 	try:
 		r = requests.post(url, data=data, headers=headers)	#try send transaction
+		if r.status_code != 201:
+			raise ValueError('Server failure')
 		if os.stat("transaction_backup.txt").st_size != 0:	#if existing some old transaction
 			trans_backup = open("transaction_backup.txt") 	
 			for line in trans_backup:			#send all old transaction
@@ -87,8 +89,15 @@ def get_list_tag():
 	else :					#if server not reachable
 		file_tags = open("tags.txt", 'r')
 		tags = file_tags.read()
+	global tags_list
 	tags_list = ast.literal_eval(tags)	
 	return tags_list
+
+def get_tag_permission(tag):
+	if tag in tags_list:
+		return False
+	return True
+
 
 def play_in_sound():
    os.system("aplay in.wav + > /dev/null 2>&1")
