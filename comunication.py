@@ -8,8 +8,9 @@ import thread
 from threading import Lock
 transaction_lock = Lock()
 tags_list = []
+
 ####### Configuring Settings #######
-server_url = "192.168.1.14:3000"
+server_url = "apis-portals.herokuapp.com"
 portalID = "1"
 ####################################
 
@@ -37,9 +38,9 @@ def websockets():
 	ws.on_open = on_open
 	ws.run_forever()
 
-def send_transaction(tag_id , direction, certainity, alarm):			
+def send_transaction(tag_id , direction, time,certainity, alarm):			
 	url = "http://"+server_url+"/api/portal_endpoint/transaction/"+portalID+""
-	data = '{"tagId":'+str(tag_id)+',"direction":"'+direction+'","time":'+str(int(time.time()))+',"certainity":"'+str(certainity)+'","alarm":"'+str(alarm)+'"}'
+	data = '{"tagId":'+str(tag_id)+',"direction":"'+direction+'","time":'+str(time)+',"certainity":"'+str(certainity)+'","alarm":"'+str(alarm)+'"}'
 	headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 	transaction_lock.acquire(True)
 	try:
@@ -104,4 +105,7 @@ def play_in_sound():
    
 def play_out_sound():
    os.system("aplay out.wav + > /dev/null 2>&1")
+
+def play_alarm_sound():
+   os.system("aplay alarm.wav + > /dev/null 2>&1")
 

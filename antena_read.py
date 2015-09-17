@@ -37,8 +37,6 @@ class AntennaReader():
         self.random_tags = [666, 12345]
     
    
-
-    
     
     def get_object_tag_id(self, center_time):
        
@@ -52,7 +50,6 @@ class AntennaReader():
         max_signal = max_tuple[1]
         certainity = True
         for tag in valid_tags:
-            print max_tuple
             if tag[0] != max_tuple[0] and tag[1] > max_signal - SIGNAL_THRESHOLD:
                 certainity = False
         self.tag_list = filter(lambda tag: tag[0] != max_tuple[0], self.tag_list)

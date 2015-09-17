@@ -30,14 +30,15 @@ class TrackedObject():
         half_frame_height = frame_height / 2
         if (len(self.history) != 0) :
             last_y = self.history[-1][1] 
+            last_time = self.history[-1][2]
             if  last_y < half_frame_height:
                 if y > half_frame_height:
-                    self.center_time = time
-                    print "som v strede"
+                    self.center_time = (time + last_time) / 2
+                    
             else:
                 if y < half_frame_height:
-                    self.center_time = time
-                    print "som v strede"
+                    self.center_time = (time + last_time) / 2
+                    
 
         position = (x, y, time)
         if len(self.history) > MAX_HISTORY:

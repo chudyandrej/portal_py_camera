@@ -141,7 +141,7 @@ def counter_person_flow(tracked_objects, antenna_reader, t):
                 tracked_object.changed_starting_pos = True
                 tag, certainity = antenna_reader.get_object_tag_id(tracked_object.center_time)
                 alarm = get_tag_permission(tag)
-                thread.start_new_thread(send_transaction,(tag,'in', certainity, alarm))
+                thread.start_new_thread(send_transaction,(tag,'in',tracked_object.center_time, certainity, alarm))
                 thread.start_new_thread(play_in_sound,())
             
         if (tracked_object.start_y > FRAME_HEIGHT / 2 and
@@ -154,7 +154,7 @@ def counter_person_flow(tracked_objects, antenna_reader, t):
                 tracked_object.changed_starting_pos = True
                 tag, certainity = antenna_reader.get_object_tag_id(tracked_object.center_time)
                 alarm = get_tag_permission(tag)
-                thread.start_new_thread(send_transaction,(tag,'out',certainity, alarm))
+                thread.start_new_thread(send_transaction,(tag,'out',tracked_object.center_time,certainity, alarm))
                 thread.start_new_thread(play_out_sound,())
 
 def parse_arguments(arguments):
