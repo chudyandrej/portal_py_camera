@@ -216,8 +216,8 @@ def tracking_start(arguments):
             frame = cv2.putText(frame,str(pass_in), (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
             frame = cv2.putText(frame,str(pass_out), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, 100 )
 
-            if record == True:
-                record_cap.write(frame)
+            #if record == True:
+            #    record_cap.write(frame)
             
             cv2.imshow('frame',frame)
             cv2.imshow('filtered_fgmask',filtered_fgmask)

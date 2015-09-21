@@ -18,7 +18,7 @@ push_locks = [Lock() for i in range(0, NUM_WORKERS)]	#init mutexes for push to q
 
 def init_capture():
 	#inicializating capture
-	cap = cv2.VideoCapture("/home/andrej/Music/colisions/video.mkv")								
+	cap = cv2.VideoCapture("pi_video4.mkv")								
 	cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320) 
 	cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 	cap.set(cv2.CAP_PROP_SATURATION, 100)		#set SATURATION 0 - 100
