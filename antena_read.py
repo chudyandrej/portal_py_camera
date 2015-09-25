@@ -45,7 +45,6 @@ class AntennaReader():
                         tag = tag_string.split(',')
                         if len(tag) == 4:
                             print int(tag[1], 16) & 0xffffff
-
                             self.tag_list.append((int(tag[1], 16) & 0xffffff,float(tag[3]), time.time()))
                 self.tag_list = filter(lambda tag: tag[2] > time.time() - TIME_TO_KEEP_TAGS , self.tag_list)
 
@@ -66,9 +65,12 @@ class AntennaReader():
         min_time = center_time - TAG_WINDOW_LENGTH
         max_time = center_time + TAG_WINDOW_LENGTH
         valid_tags = filter(lambda tag: tag[2] > min_time and tag[2] < max_time, self.tag_list)
+        for tag in valid_tags:
 
         if not valid_tags:
             return -1, True
+        new_uniq_list= list(set(valid_tags[0]))
+        
         max_tuple = max(valid_tags, key=lambda tag: tag[1])
         max_signal = max_tuple[1]
         certainity = True
