@@ -3,16 +3,20 @@ from __future__ import division
 from collections import deque
 import random
 from collections import namedtuple
+import cv2
+import os
 MAX_HISTORY = 15
 MIN_DISTANCE_OF_PASS = 250
 frame_width = 320;
 frame_height = 240;
+
 class TrackedObject():
 
     def __init__(self, x, y, time):
         self.history = deque()
+        self.photo = False
         self.frames_since_start = 0
-        self.update (x, y, time)
+        self.update (x, y, time, None)
         self.frames_missing = 0
         self.start_x = x
         self.start_y = y
@@ -26,18 +30,29 @@ class TrackedObject():
 
 
 
-    def update (self, x, y, time):
+    def update (self, x, y, time, frame):
         half_frame_height = frame_height / 2
         if (len(self.history) != 0) :
             last_y = self.history[-1][1] 
             last_time = self.history[-1][2]
             if  last_y < half_frame_height:
                 if y > half_frame_height:
+                    if self.photo:
+                        os.remove(self.photo)
                     self.center_time = (time + last_time) / 2
+                    self.photo = 'images/' + str(int(self.center_time * 1000)) + str(self.id) + ".png"
+
+                    cv2.imwrite(self.photo,frame)
+
+
                     
             else:
                 if y < half_frame_height:
+                    if self.photo:
+                        os.remove(self.photo)
                     self.center_time = (time + last_time) / 2
+                    self.photo = 'images/' + str(int(self.center_time * 1000)) + str(self.id) + ".png"
+                    cv2.imwrite(self.photo,frame)
                     
 
         position = (x, y, time)
@@ -108,3 +123,6 @@ class TrackedObject():
 
 
         return Point(int(current_x), int(current_y))
+    def __del__(self):
+        if self.photo:
+            os.remove(self.photo)

@@ -8,7 +8,7 @@ from tracked_object import TrackedObject
 from collections import namedtuple
 from bg_subtractor import frames, start_threads, load_settings
 from comunication import send_transaction, get_tag_permission
-from comunication import play_in_sound, play_out_sound
+
 from antena_read import AntennaReader
 
 ###############SETTINGS##############################
@@ -20,6 +20,7 @@ PENALT = 20
 FRAME_WIDTH = 320
 FRAME_HEIGHT = 240
 RECORD = False
+dir_reversed = False
 ######################################################
 
 pass_in = 0
@@ -113,11 +114,12 @@ def create_objects(unused_cnts, tracked_objects, t):
         tracked_objects.append(new_obj)
         
 
-def update_pairs(pairs, t):
+def update_pairs(pairs, t, frame):
     #update position old objects
+
     for pair in pairs:
         obj, cnt = pair
-        obj.update(cnt.point.x, cnt.point.y, t)
+        obj.update(cnt.point.x, cnt.point.y, t, frame)
 
 def update_missing(unused_objects, tracked_objects):
     #update information about missing object
@@ -131,6 +133,7 @@ def counter_person_flow(tracked_objects, antenna_reader, t):
     for tracked_object in tracked_objects:
         global record
         record = True
+
         if (tracked_object.start_y < FRAME_HEIGHT / 2 and 
                 tracked_object.get_prediction(t).y > FRAME_HEIGHT - FRAME_HEIGHT / 4 ): #up line 
             i , o = tracked_object.abs_disto_obj(tracked_object, t)
@@ -141,8 +144,15 @@ def counter_person_flow(tracked_objects, antenna_reader, t):
                 tracked_object.changed_starting_pos = True
                 tag, certainity = antenna_reader.get_object_tag_id(tracked_object.center_time)
                 alarm = get_tag_permission(tag)
-                thread.start_new_thread(send_transaction,(tag,'in',tracked_object.center_time, certainity, alarm))
-                thread.start_new_thread(play_in_sound,())
+                if dir_reversed:
+                    
+                    thread.start_new_thread(send_transaction,(tag,'in',tracked_object.center_time, certainity, alarm, tracked_object.photo))
+                   
+                else :
+                    
+                    thread.start_new_thread(send_transaction,(tag,'out',tracked_object.center_time,certainity, alarm, tracked_object.photo))
+                    
+
             
         if (tracked_object.start_y > FRAME_HEIGHT / 2 and
                 tracked_object.get_prediction(t).y < FRAME_HEIGHT / 4 ):    #down line
@@ -154,8 +164,13 @@ def counter_person_flow(tracked_objects, antenna_reader, t):
                 tracked_object.changed_starting_pos = True
                 tag, certainity = antenna_reader.get_object_tag_id(tracked_object.center_time)
                 alarm = get_tag_permission(tag)
-                thread.start_new_thread(send_transaction,(tag,'out',tracked_object.center_time,certainity, alarm))
-                thread.start_new_thread(play_out_sound,())
+                if dir_reversed :
+                    thread.start_new_thread(send_transaction,(tag,'out',tracked_object.center_time,certainity, alarm, tracked_object.photo))
+                    
+                else :
+                    thread.start_new_thread(send_transaction,(tag,'in',tracked_object.center_time,certainity, alarm, tracked_object.photo))
+                    
+
 
 def parse_arguments(arguments):
     if "-gui" in arguments:
@@ -192,7 +207,7 @@ def tracking_start(arguments):
         
         pairs, unused_cnts, unused_objects = parse_contours(contour_objects, tracked_objects,t)
         pause = create_objects(unused_cnts, tracked_objects,t)
-        update_pairs(pairs, t)
+        update_pairs(pairs, t, frame)
         update_missing(unused_objects,tracked_objects)
         counter_person_flow(tracked_objects, antena_reader, t)
         if GUI:
@@ -226,7 +241,7 @@ def tracking_start(arguments):
 
             key = cv2.waitKey(frame_delay)
             if key & 0xFF == ord('q'):
-            	break
+                break
             if key & 0xFF == ord('s'):
                 frame_delay = 500
             if key & 0xFF == ord('f'):

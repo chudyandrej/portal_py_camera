@@ -33,13 +33,25 @@ class AntennaReader():
             try:
                 print >>sys.stderr, 'client connected:', client_address
                 while True:
-                    data = connection.recv(255)
-                    tag = data.split(',')
+                    data = connection.recv(1000)
+                    if not data:
+                        break
+                    data = data.replace("\x00", "")
+                    data = data.replace("\r", "")
                     
-                    tag[3] = tag[3].replace("\r\n\x00", "")
-                    print tag
-                    self.tag_list.append((tag[1],tag[3], int(tag[2])/1000))
+                    tags = data.split('\n')
+                    
+                    for tag_string in tags:
+                        tag = tag_string.split(',')
+                        if len(tag) == 4:
+                            print int(tag[1], 16) & 0xffffff
+
+                            self.tag_list.append((int(tag[1], 16) & 0xffffff,float(tag[3]), time.time()))
+                self.tag_list = filter(lambda tag: tag[2] > time.time() - TIME_TO_KEEP_TAGS , self.tag_list)
+
+                    
             finally:
+                print "connection closed"
                 connection.close()
 
     def __init__(self):
@@ -54,9 +66,7 @@ class AntennaReader():
         min_time = center_time - TAG_WINDOW_LENGTH
         max_time = center_time + TAG_WINDOW_LENGTH
         valid_tags = filter(lambda tag: tag[2] > min_time and tag[2] < max_time, self.tag_list)
-        print "tag list  : " + str(self.tag_list)
-        print "valid_tags : " + str(valid_tags)
-        print "center_time : " + str(center_time) 
+
         if not valid_tags:
             return -1, True
         max_tuple = max(valid_tags, key=lambda tag: tag[1])
@@ -72,8 +82,7 @@ class AntennaReader():
 
         
 
-        print int(max_tuple[0], scale) & 0xFFFFFFFF
-
-        return max_tuple[0], certainity
+        tag_ID = max_tuple[0]
+        return tag_ID, certainity
 
 		
