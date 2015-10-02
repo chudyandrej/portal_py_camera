@@ -197,13 +197,13 @@ def tracking_start(arguments):
    
     while(True):
         #print "q.size " + str(frames.qsize())
-        frame , fgmask = frames.get(block=True)
+        frame , fgmask, t = frames.get(block=True)
         global record
         record = False;
         
         filtered_fgmask = erode_dilate(fgmask)
         contour_objects = find_contours(filtered_fgmask)
-        t = time.time()
+        
         
         pairs, unused_cnts, unused_objects = parse_contours(contour_objects, tracked_objects,t)
         pause = create_objects(unused_cnts, tracked_objects,t)

@@ -4,6 +4,7 @@ import thread
 from Queue import Queue
 from threading import Lock
 from comunication import get_json_settings, get_list_tag
+import time
 
 ###############SETTINGS##############################
 NUM_WORKERS = 3         #Number of worker threads
@@ -60,7 +61,7 @@ def worker(index, bg_subtractor, cap):
         cap_locks[(index + 1) % NUM_WORKERS].release()  #post mutex to read for next worker
         result = bg_subtractor.apply(frame)             #calculate bg substrat
         push_locks[index].acquire(True)                 #mutex to push readed freme and fg mask
-        frames.put((frame, result), block=True)         #result push to queue
+        frames.put((frame, result, time.time()), block=True)         #result push to queue
         push_locks[(index + 1) % NUM_WORKERS].release() #post mutex to push for next worker
 
 
