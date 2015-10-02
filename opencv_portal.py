@@ -13,6 +13,7 @@ from antena_read import AntennaReader
 
 ###############SETTINGS##############################
 GUI = False
+RECORDING = False
 MIN_CONTOUR_AREA = 2200
 MAX_DISTANCE_TO_PARSE = 60
 MIN_DISTANCE_TO_PARSE = 60
@@ -54,19 +55,13 @@ def calc_distance_elips(point1, point2):
     b = (point1[1] - point2[1]) / 1.5
     return  math.sqrt(a**2 + b**2)
 
-def calc_distance(point1, point2):
-    #calc absolut distance whit benefit on y 
-    a = (point1[0] - point2[0]) 
-    b = (point1[1] - point2[1]) / 1.5
-    return  math.sqrt(a**2 + b**2)
-
 def parse_contours(contours, tracked_objects,t):
     distances = []  #create list of distances betwen tracked_objects and contours
     potential_relicts = []  #create list of potential_relicts contours
 
     for obj in tracked_objects:
         for cnt in contours:
-            distance = calc_distance(obj.get_prediction(t),cnt.point)
+            distance = calc_distance_elips(obj.get_prediction(t),cnt.point)
             if(distance < MAX_DISTANCE_TO_PARSE):
                 distances.append((obj, cnt, distance))
             if distance < MIN_DISTANCE_TO_PARSE:
@@ -116,7 +111,6 @@ def create_objects(unused_cnts, tracked_objects, t):
 
 def update_pairs(pairs, t, frame):
     #update position old objects
-
     for pair in pairs:
         obj, cnt = pair
         obj.update(cnt.point.x, cnt.point.y, t, frame)
@@ -145,15 +139,10 @@ def counter_person_flow(tracked_objects, antenna_reader, t):
                 tag, certainity = antenna_reader.get_object_tag_id(tracked_object.center_time)
                 alarm = get_tag_permission(tag)
                 if dir_reversed:
-                    
-                    thread.start_new_thread(send_transaction,(tag,'in',tracked_object.center_time, certainity, alarm, tracked_object.photo))
-                   
+                    thread.start_new_thread(send_transaction,(tag,'in',tracked_object.center_time, certainity, alarm))
                 else :
+                    thread.start_new_thread(send_transaction,(tag,'out',tracked_object.center_time,certainity, alarm))
                     
-                    thread.start_new_thread(send_transaction,(tag,'out',tracked_object.center_time,certainity, alarm, tracked_object.photo))
-                    
-
-            
         if (tracked_object.start_y > FRAME_HEIGHT / 2 and
                 tracked_object.get_prediction(t).y < FRAME_HEIGHT / 4 ):    #down line
             i , o = tracked_object.abs_disto_obj(tracked_object, t)
@@ -165,21 +154,20 @@ def counter_person_flow(tracked_objects, antenna_reader, t):
                 tag, certainity = antenna_reader.get_object_tag_id(tracked_object.center_time)
                 alarm = get_tag_permission(tag)
                 if dir_reversed :
-                    thread.start_new_thread(send_transaction,(tag,'out',tracked_object.center_time,certainity, alarm, tracked_object.photo))
-                    
+                    thread.start_new_thread(send_transaction,(tag,'out',tracked_object.center_time,certainity, alarm))
                 else :
-                    thread.start_new_thread(send_transaction,(tag,'in',tracked_object.center_time,certainity, alarm, tracked_object.photo))
+                    thread.start_new_thread(send_transaction,(tag,'in',tracked_object.center_time,certainity, alarm))
                     
-
 
 def parse_arguments(arguments):
-    if "-gui" in arguments:
+    if "-g" in arguments:
         global GUI
         GUI = True
+    if "-r" in arguments:
+        global RECORDING
+        RECORDING = True
                 
 def tracking_start(arguments):
-    frame_delay = 20
-
     parse_arguments(arguments)
 
     global MIN_CONTOUR_AREA
@@ -190,9 +178,9 @@ def tracking_start(arguments):
 
     start_threads()
     tracked_objects = []
-
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    record_cap = cv2.VideoWriter('output.avi',fourcc, 20.0, (FRAME_WIDTH,FRAME_HEIGHT))
+    if RECORDING:
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        record_cap = cv2.VideoWriter('output.avi',fourcc, 20.0, (FRAME_WIDTH,FRAME_HEIGHT))
     antena_reader = AntennaReader()
    
     while(True):
@@ -213,6 +201,7 @@ def tracking_start(arguments):
         if GUI:
             cv2.namedWindow('frame', 0)             #init windows
             cv2.namedWindow('filtered_fgmask', 0) 
+        if GUI or RECORDING: 
             for obj in tracked_objects:
                 cv2.putText(frame,str(obj.id), obj.get_prediction(t), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
                 frame = cv2.circle(frame, obj.get_prediction(t), 5, obj.color, -1)
@@ -230,16 +219,14 @@ def tracking_start(arguments):
 
             frame = cv2.putText(frame,str(pass_in), (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
             frame = cv2.putText(frame,str(pass_out), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, 100 )
-
-            #if record == True:
-            #    record_cap.write(frame)
-            
+        if RECORDING:
+            if record == True:
+                record_cap.write(frame)
+        if GUI:   
             cv2.imshow('frame',frame)
             cv2.imshow('filtered_fgmask',filtered_fgmask)
 
-
-
-            key = cv2.waitKey(frame_delay)
+            key = cv2.waitKey(1)
             if key & 0xFF == ord('q'):
                 break
             if key & 0xFF == ord('s'):
@@ -248,6 +235,3 @@ def tracking_start(arguments):
                 frame_delay = 1
     if GUI:
         cv2.destroyAllWindows()
-      
-
-

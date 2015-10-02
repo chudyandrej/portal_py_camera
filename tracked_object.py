@@ -14,7 +14,6 @@ class TrackedObject():
 
     def __init__(self, x, y, time):
         self.history = deque()
-        self.photo = False
         self.frames_since_start = 0
         self.update (x, y, time, None)
         self.frames_missing = 0
@@ -27,9 +26,6 @@ class TrackedObject():
         self.color = (255*random.random(), 255*random.random(),
                 255*random.random())
 
-
-
-
     def update (self, x, y, time, frame):
         half_frame_height = frame_height / 2
         if (len(self.history) != 0) :
@@ -37,24 +33,11 @@ class TrackedObject():
             last_time = self.history[-1][2]
             if  last_y < half_frame_height:
                 if y > half_frame_height:
-                    if self.photo:
-                        os.remove(self.photo)
-                    self.center_time = (time + last_time) / 2
-                    self.photo = 'images/' + str(int(self.center_time * 1000)) + str(self.id) + ".png"
-
-                    cv2.imwrite(self.photo,frame)
-
-
-                    
+                    self.center_time = (time + last_time) / 2 
             else:
                 if y < half_frame_height:
-                    if self.photo:
-                        os.remove(self.photo)
                     self.center_time = (time + last_time) / 2
-                    self.photo = 'images/' + str(int(self.center_time * 1000)) + str(self.id) + ".png"
-                    cv2.imwrite(self.photo,frame)
                     
-
         position = (x, y, time)
         if len(self.history) > MAX_HISTORY:
             self.history.popleft()
@@ -62,7 +45,6 @@ class TrackedObject():
         self.frames_missing = 0
         self.frames_since_start += 1
         self.old_time = time
-
 
     def get_position(self):
         Point = namedtuple('Point', 'x y')
@@ -118,11 +100,8 @@ class TrackedObject():
         delta_t = current_t - last_t
 
         current_x = last_x + v_x * delta_t
-
         current_y = last_y + v_y * delta_t
 
 
         return Point(int(current_x), int(current_y))
-    def __del__(self):
-        if self.photo:
-            os.remove(self.photo)
+

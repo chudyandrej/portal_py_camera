@@ -14,9 +14,6 @@ SIGNAL_THRESHOLD = 0.3
 TIME_TO_BAN = 1
 class AntennaReader():
 
-
-
-
     def read_forever(self):
 
         # Create a TCP/IP socket
@@ -93,11 +90,7 @@ class AntennaReader():
         self.tag_list = filter(lambda tag: tag[0] != max_tuple[0], self.tag_list)
         self.banned_tags_with_timestamp.append((max_tuple[0], time.time()))
 
-
-
         scale = 16 ## equals to hexadecimal
-
-        
 
         tag_ID = max_tuple[0]
         return tag_ID, certainity

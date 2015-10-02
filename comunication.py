@@ -6,7 +6,6 @@ import os
 import ast
 import thread
 from threading import Lock
-import pyttsx
 import thread
 transaction_lock = Lock()
 tags_list = []
@@ -91,7 +90,6 @@ def get_request(url):
     try: 
         r = requests.get(url)   #try get request
     except:
-        raise
         print '\033[1;31m Server not reachable \033[1;m'
         return None ,None
     json_request = json.loads(r.text)   #convert to json
@@ -135,7 +133,6 @@ def play_sound(direction, name):
             direction = "von"
         
         command = "espeak -v sk --stdout '%s %s' | aplay" % (name, direction)
-        
 
         os.system(command.encode('UTF-8'))
         
