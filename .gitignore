@@ -1,4 +1,4 @@
 
 *.pyc
 .avi
-
+.DS_Store

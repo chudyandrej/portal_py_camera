@@ -112,7 +112,7 @@ def update_pairs(pairs, t, frame):
     #update position old objects
     for pair in pairs:
         obj, cnt = pair
-        obj.update(cnt.point.x, cnt.point.y, t, frame)
+        obj.update(cnt.point.x, cnt.point.y, t)
 
 def update_missing(unused_objects, tracked_objects):
     #update information about missing object
@@ -167,7 +167,7 @@ def parse_arguments(arguments):
         PERM_RECORD = True
                 
 def tracking_start(arguments):
-    parse_arguments(arguments)
+    parse_arguments(arguments)  #load arguments
 
     global MIN_CONTOUR_AREA
     global MAX_DISTANCE_TO_PARSE
@@ -182,7 +182,7 @@ def tracking_start(arguments):
         record_cap = cv2.VideoWriter('output.avi',fourcc, 20.0, (FRAME_WIDTH,FRAME_HEIGHT))
     antena_reader = AntennaReader()
    
-    while(True):
+    while(cap.isOpened()):
         #print "q.size " + str(frames.qsize())
         frame , fgmask, t = frames.get(block=True)
         global record
@@ -232,5 +232,6 @@ def tracking_start(arguments):
                 frame_delay = 500
             if key & 0xFF == ord('f'):
                 frame_delay = 1
+    cap.release()
     if GUI:
         cv2.destroyAllWindows()

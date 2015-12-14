@@ -4,7 +4,6 @@ import json
 import time
 import os
 import ast
-import thread
 from threading import Lock
 import thread
 import sys

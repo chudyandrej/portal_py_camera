@@ -15,7 +15,7 @@ class TrackedObject():
     def __init__(self, x, y, time):
         self.history = deque()
         self.frames_since_start = 0
-        self.update (x, y, time, None)
+        self.update (x, y, time)
         self.frames_missing = 0
         self.start_x = x
         self.start_y = y
@@ -26,7 +26,7 @@ class TrackedObject():
         self.color = (255*random.random(), 255*random.random(),
                 255*random.random())
 
-    def update (self, x, y, time, frame):
+    def update (self, x, y, time):
         half_frame_height = frame_height / 2
         if (len(self.history) != 0) :
             last_y = self.history[-1][1] 
