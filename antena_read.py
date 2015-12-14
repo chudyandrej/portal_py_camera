@@ -6,7 +6,6 @@ import sys
 import binascii
 
 
-
 POLL_INTERVAL = 0.01
 TIME_TO_KEEP_TAGS = 20
 MAX_TAG_WINDOW_LENGTH = 2
@@ -89,10 +88,9 @@ class AntennaReader():
                 certainity = False
         self.tag_list = filter(lambda tag: tag[0] != max_tuple[0], self.tag_list)
         self.banned_tags_with_timestamp.append((max_tuple[0], time.time()))
-
         scale = 16 ## equals to hexadecimal
-
         tag_ID = max_tuple[0]
+        
         return tag_ID, certainity
 
         

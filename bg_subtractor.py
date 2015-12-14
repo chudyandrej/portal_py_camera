@@ -70,7 +70,6 @@ def start_threads():
     cap = init_capture()                    
     bg_subtractor = init_bg_subtractor()
     get_list_tag()
-
     thread.start_new_thread(websockets,()) #start websocket thread
     #start all workers
     for i in range(0, NUM_WORKERS):                     

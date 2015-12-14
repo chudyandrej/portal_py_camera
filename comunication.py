@@ -7,6 +7,7 @@ import ast
 import thread
 from threading import Lock
 import thread
+import sys
 transaction_lock = Lock()
 tags_list = []
 
@@ -14,19 +15,6 @@ tags_list = []
 server_url = "192.168.1.23:3000"
 portalID = "1"
 ####################################
-
-from contextlib import contextmanager
-import sys
-
-@contextmanager
-def suppress_stdout():
-    with open(os.devnull, "w") as devnull:
-        old_stdout = sys.stdout
-        sys.stdout = devnull
-        try:  
-            yield
-        finally:
-            sys.stdout = old_stdout
 
 
 def on_message(ws, message):
@@ -56,7 +44,7 @@ def websockets():
     ws.on_open = on_open
     ws.run_forever()
 
-def send_transaction(tag_id , direction, time,certainity, alarm, photo):           
+def send_transaction(tag_id , direction, time,certainity, alarm):           
     url = "http://"+server_url+"/api/portal_endpoint/transaction/"+portalID+""
     data = '{"tagId":'+str(tag_id)+',"direction":"'+direction+'","time":'+str(time)+',"certainity":"'+str(certainity)+'","alarm":"'+str(alarm)+'"}'
     print "transaction_data : " + data
@@ -65,9 +53,6 @@ def send_transaction(tag_id , direction, time,certainity, alarm, photo):
 
     try:
         r = requests.post(url, data=data, headers=headers)  #try send transaction
-        
-        print "Body =" + r.text
-        print r.status_code
         if r.status_code != 201:
             raise ValueError('Server failure')
         thread.start_new_thread(play_sound,(direction, r.text))
@@ -133,7 +118,6 @@ def play_sound(direction, name):
             direction = "von"
         
         command = "espeak -v sk --stdout '%s %s' | aplay" % (name, direction)
-
         os.system(command.encode('UTF-8'))
         
         

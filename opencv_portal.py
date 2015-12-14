@@ -8,20 +8,19 @@ from tracked_object import TrackedObject
 from collections import namedtuple
 from bg_subtractor import frames, start_threads, load_settings
 from comunication import send_transaction, get_tag_permission
-
 from antena_read import AntennaReader
 
-###############SETTINGS##############################
-GUI = False
-RECORDING = False
-MIN_CONTOUR_AREA = 2200
-MAX_DISTANCE_TO_PARSE = 60
-MIN_DISTANCE_TO_PARSE = 60
-PENALT = 20
+####################SETTINGS###########################
+GUI = False         #show GUI
+PERM_RECORD = False   #permissions to record
+MIN_CONTOUR_AREA = 2200 
+MAX_DISTANCE_TO_PARSE = 60  # maximal distance to assing conture to object
+MIN_DISTANCE_TO_PARSE = 60  
+PENALT = 20         
 FRAME_WIDTH = 320
 FRAME_HEIGHT = 240
-RECORD = False
-dir_reversed = False
+RECORD = False      #motion tracker
+dir_reversed = False    #revers monitoring
 ######################################################
 
 pass_in = 0
@@ -164,8 +163,8 @@ def parse_arguments(arguments):
         global GUI
         GUI = True
     if "-r" in arguments:
-        global RECORDING
-        RECORDING = True
+        global PERM_RECORD
+        PERM_RECORD = True
                 
 def tracking_start(arguments):
     parse_arguments(arguments)
@@ -178,7 +177,7 @@ def tracking_start(arguments):
 
     start_threads()
     tracked_objects = []
-    if RECORDING:
+    if PERM_RECORD:
         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
         record_cap = cv2.VideoWriter('output.avi',fourcc, 20.0, (FRAME_WIDTH,FRAME_HEIGHT))
     antena_reader = AntennaReader()
@@ -201,7 +200,7 @@ def tracking_start(arguments):
         if GUI:
             cv2.namedWindow('frame', 0)             #init windows
             cv2.namedWindow('filtered_fgmask', 0) 
-        if GUI or RECORDING: 
+        if GUI or PERM_RECORD: 
             for obj in tracked_objects:
                 cv2.putText(frame,str(obj.id), obj.get_prediction(t), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
                 frame = cv2.circle(frame, obj.get_prediction(t), 5, obj.color, -1)
@@ -219,7 +218,7 @@ def tracking_start(arguments):
 
             frame = cv2.putText(frame,str(pass_in), (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
             frame = cv2.putText(frame,str(pass_out), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, 100 )
-        if RECORDING:
+        if PERM_RECORD:
             if record == True:
                 record_cap.write(frame)
         if GUI:   
