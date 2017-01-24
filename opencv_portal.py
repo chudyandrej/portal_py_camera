@@ -6,9 +6,9 @@ import math
 import random
 from tracked_object import TrackedObject
 from collections import namedtuple
-from bg_subtractor import frames, start_threads, load_settings
-from comunication import send_transaction, get_tag_permission
-from antena_read import AntennaReader
+from bg_subtractor import frames, start_threads
+
+
 
 ####################SETTINGS###########################
 GUI = False         #show GUI
@@ -120,7 +120,7 @@ def update_missing(unused_objects, tracked_objects):
         if unused_object.missing() == -1:
             tracked_objects.remove(unused_object)
   
-def counter_person_flow(tracked_objects, antenna_reader, t):
+def counter_person_flow(tracked_objects, t):
     global pass_in
     global pass_out
     for tracked_object in tracked_objects:
@@ -135,12 +135,7 @@ def counter_person_flow(tracked_objects, antenna_reader, t):
             if i != 0 or o != 0:   #object-counting 
                 tracked_object.start_y = FRAME_HEIGHT
                 tracked_object.changed_starting_pos = True
-                tag, certainity = antenna_reader.get_object_tag_id(tracked_object.center_time)
-                alarm = get_tag_permission(tag)
-                if dir_reversed:
-                    thread.start_new_thread(send_transaction,(tag,'in',tracked_object.center_time, certainity, alarm))
-                else :
-                    thread.start_new_thread(send_transaction,(tag,'out',tracked_object.center_time,certainity, alarm))
+                
                     
         if (tracked_object.start_y > FRAME_HEIGHT / 2 and
                 tracked_object.get_prediction(t).y < FRAME_HEIGHT / 4 ):    #down line
@@ -150,12 +145,7 @@ def counter_person_flow(tracked_objects, antenna_reader, t):
             if i != 0 or o != 0:   #object-counting
                 tracked_object.start_y = 0
                 tracked_object.changed_starting_pos = True
-                tag, certainity = antenna_reader.get_object_tag_id(tracked_object.center_time)
-                alarm = get_tag_permission(tag)
-                if dir_reversed :
-                    thread.start_new_thread(send_transaction,(tag,'out',tracked_object.center_time,certainity, alarm))
-                else :
-                    thread.start_new_thread(send_transaction,(tag,'in',tracked_object.center_time,certainity, alarm))
+                
                     
 
 def parse_arguments(arguments):
@@ -180,9 +170,9 @@ def tracking_start(arguments):
     if PERM_RECORD:
         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
         record_cap = cv2.VideoWriter('output.avi',fourcc, 20.0, (FRAME_WIDTH,FRAME_HEIGHT))
-    antena_reader = AntennaReader()
+    
    
-    while(cap.isOpened()):
+    while(True):
         #print "q.size " + str(frames.qsize())
         frame , fgmask, t = frames.get(block=True)
         global record
@@ -196,7 +186,7 @@ def tracking_start(arguments):
         pause = create_objects(unused_cnts, tracked_objects,t)
         update_pairs(pairs, t, frame)
         update_missing(unused_objects,tracked_objects)
-        counter_person_flow(tracked_objects, antena_reader, t)
+        counter_person_flow(tracked_objects, t)
         if GUI:
             cv2.namedWindow('frame', 0)             #init windows
             cv2.namedWindow('filtered_fgmask', 0) 
@@ -232,6 +222,6 @@ def tracking_start(arguments):
                 frame_delay = 500
             if key & 0xFF == ord('f'):
                 frame_delay = 1
-    cap.release()
+   
     if GUI:
         cv2.destroyAllWindows()

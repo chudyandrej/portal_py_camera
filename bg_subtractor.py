@@ -1,16 +1,15 @@
 import cv2
-from comunication import websockets
 import thread
 from Queue import Queue
 from threading import Lock
-from comunication import get_json_settings, get_list_tag
+
 import time
 
 ###############SETTINGS##############################
-NUM_WORKERS = 3         #Number of worker threads
-LEARN_HISTORY = 1000
-THRESHOLD = 3000
-SHADOW_THRESHOLD = 0.7
+NUM_WORKERS = 5         #Number of worker threads
+LEARN_HISTORY = 600
+THRESHOLD = 2000
+SHADOW_THRESHOLD = 0.1
 #####################################################
 
 frames = Queue(10)      #init queue of frams and bg masks
@@ -25,22 +24,6 @@ def init_capture():
     cap.set(cv2.CAP_PROP_SATURATION, 100)       #set SATURATION 0 - 100
     return cap
 
-def load_settings():
-    #load settings from server
-    settings = get_json_settings()
-    
-    global LEARN_HISTORY
-    LEARN_HISTORY = settings['learning_history']
-    global THRESHOLD
-    THRESHOLD = settings['thresholding']
-    global SHADOW_THRESHOLD
-    SHADOW_THRESHOLD = settings['shadow_thresh']
-
-    min_area = settings['min_area']
-    max_dist_to_pars = settings['max_dist_to_pars']
-    min_dis_to_create = settings['min_dis_to_create']
-    penalt = settings['penalt']
-    return min_area, max_dist_to_pars, min_dis_to_create, penalt
 
 def init_bg_subtractor():
     #inicializating bg_subtractor
@@ -69,8 +52,7 @@ def start_threads():
     #function to start all thread of program
     cap = init_capture()                    
     bg_subtractor = init_bg_subtractor()
-    get_list_tag()
-    thread.start_new_thread(websockets,()) #start websocket thread
+   
     #start all workers
     for i in range(0, NUM_WORKERS):                     
         cap_locks[i].acquire(True)

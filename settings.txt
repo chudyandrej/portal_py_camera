@@ -1,1 +1,0 @@
-{"learning_history":1000,"thresholding":1300,"min_area":2200,"min_dis_to_create":70,"max_dist_to_pars":60,"shadow_thresh":1,"penalt":20}
