@@ -1,6 +1,6 @@
 import cv2
-import thread
-from Queue import Queue
+import _thread
+from queue import Queue
 from threading import Lock
 
 import time
@@ -57,7 +57,7 @@ def start_threads():
     for i in range(0, NUM_WORKERS):                     
         cap_locks[i].acquire(True)
         push_locks[i].acquire(True)
-        thread.start_new_thread(worker, (i, bg_subtractor, cap))
+        _thread.start_new_thread(worker, (i, bg_subtractor, cap))
 
     cap_locks[0].release()
     push_locks[0].release()

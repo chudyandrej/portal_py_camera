@@ -1,9 +1,7 @@
 import numpy as np
 import cv2
-import thread
-import time
 import math
-import random
+
 from tracked_object import TrackedObject
 from collections import namedtuple
 from bg_subtractor import frames, start_threads
@@ -177,11 +175,11 @@ def tracking_start(arguments):
         frame , fgmask, t = frames.get(block=True)
         global record
         record = False;
-        
+
         filtered_fgmask = erode_dilate(fgmask)
         contour_objects = find_contours(filtered_fgmask)
-        
-        
+
+
         pairs, unused_cnts, unused_objects = parse_contours(contour_objects, tracked_objects,t)
         pause = create_objects(unused_cnts, tracked_objects,t)
         update_pairs(pairs, t, frame)
@@ -189,22 +187,25 @@ def tracking_start(arguments):
         counter_person_flow(tracked_objects, t)
         if GUI:
             cv2.namedWindow('frame', 0)             #init windows
-            cv2.namedWindow('filtered_fgmask', 0) 
-        if GUI or PERM_RECORD: 
+            cv2.namedWindow('filtered_fgmask', 0)
+
+        if GUI or PERM_RECORD:
             for obj in tracked_objects:
-                cv2.putText(frame,str(obj.id), obj.get_prediction(t), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+                print(obj.get_prediction(t))
+                cv2.putText(frame, str(obj.id), obj.get_prediction(t), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+
                 frame = cv2.circle(frame, obj.get_prediction(t), 5, obj.color, -1)
                 frame = cv2.ellipse(frame, obj.get_prediction(t), (60, 90), 0, 0, 360, obj.color)
             for pair in pairs:
                 obj, cnt = pair
-                
+
                 w = cnt.size[0]
                 h = cnt.size[1]
-                x = cnt.point.x - w/2
-                y = cnt.point.y - h/2 
+                x = int(cnt.point.x - w/2)
+                y = int(cnt.point.y - h/2)
                 frame = cv2.rectangle(frame, (x,y), (x+w,y+h), obj.color)
                 frame = cv2.circle(frame, obj.get_prediction(t), 10, obj.color, -1)
-                frame = cv2.ellipse(frame, obj.get_prediction(t), (60, 90), 0, 0, 360, obj.color)          
+                frame = cv2.ellipse(frame, obj.get_prediction(t), (60, 90), 0, 0, 360, obj.color)
 
             frame = cv2.putText(frame,str(pass_in), (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
             frame = cv2.putText(frame,str(pass_out), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, 100 )

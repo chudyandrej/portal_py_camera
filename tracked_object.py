@@ -84,7 +84,7 @@ class TrackedObject():
         if (len(self.history) == 0) :
             return Point(0,0)
         if (len(self.history) == 1) :
-            return Point(self.history[0][0],self.history[0][1])
+            return Point(int(self.history[0][0]),int(self.history[0][1]))
         start_x = self.history[0][0]
         start_y = self.history[0][1]
         start_t = self.history[0][2]
